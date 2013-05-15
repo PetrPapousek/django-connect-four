@@ -12,7 +12,7 @@ from model_utils.managers import PassThroughManager
 from model_utils.models import TimeStampedModel
 from mezzanine.pages.models import Page
 from mezzanine.conf import settings
-from connect_four.exceptions import AlreadyTaken
+from connect_four.exceptions import AlreadyTaken, AreadyOver
 
 from connect_four.threadlocals import get_current_user
 
@@ -35,7 +35,6 @@ class Game(TimeStampedModel):
         verbose_name=_('created by'),
         related_name="created_game_set",
         editable=False,
-        # default=get_current_user,
         null=True,
         blank=True,
     )
@@ -45,7 +44,6 @@ class Game(TimeStampedModel):
         verbose_name=_('player1'),
         related_name="player1_game_set",
         editable=False,
-        # default=get_current_user,
         null=True,
         blank=True,
     )
@@ -57,6 +55,20 @@ class Game(TimeStampedModel):
         editable=False,
         null=True,
         blank=True,
+    )
+
+    player_won = models.ForeignKey(
+        to=User,
+        verbose_name=_('player won'),
+        related_name="won_game_set",
+        editable=False,
+        null=True,
+        blank=True,
+    )
+
+    next_player = models.IntegerField(
+        editable=False,
+        default=1,
     )
 
     cols = models.PositiveIntegerField(
@@ -71,6 +83,16 @@ class Game(TimeStampedModel):
 
     state = JSONField(
         editable=False,
+    )
+
+    victory = models.IntegerField(
+        editable=False,
+        default=settings.VICTORY,
+    )
+
+    over = models.BooleanField(
+        editable=False,
+        default=False,
     )
 
     objects = PassThroughManager.for_queryset_class(GameQuerySet)()
@@ -97,10 +119,52 @@ class Game(TimeStampedModel):
     def init_state(self):
         self.state = self.get_initial_state()
 
-    def move(self, row, col, player):
+    def toggle_next_player(self):
+        self.next_player = 2 if self.next_player == 1 else 1
+
+    def count_direction(self, row, col, row_step, col_step, player):
+        try:
+            if self.state[row][col] == player:
+                return self.count_direction(
+                    row + row_step, col + col_step,
+                    row_step, col_step, player) + 1
+            else:
+                return 0
+        except IndexError:
+            return 0
+
+    def count_line(self, row, col, s, p):
+        count = 1
+        count += self.count_direction(row + s[0], col + s[1], s[0], s[1], p)
+        count += self.count_direction(row - s[0], col - s[1], -s[0], -s[1], p)
+        return count
+
+    def move(self, row, col):
+        if self.over:
+            raise AreadyOver
         if self.state[row][col]:
             raise AlreadyTaken
-        self.state[row][col] = player
+        self.state[row][col] = self.next_player
+        # lines = {
+        #     'horizontal': ((1, 0, 1, 0), (-1, 0, -1, 0)),
+        #     'vertical':   ((0, 1, 1, 0), (0, -1, -1, 0)),
+        #     'slash': ((1, 1, 1, 1), (-1, -1, -1, -1)),
+        #     'backslash': ((-1, 1, -1, 1), (1, -1, 1, -1)),
+        # }
+        lines = {  # (row step, col step)
+            'horizontal': (0, 1),  'vertical':  (1, 0),
+            'slash':      (1, 1), 'backslash': (-1, 1),
+        }
+        victory_lines = []
+        for line, setting in lines.items():
+            line_count = self.count_line(row, col, setting, self.next_player)
+            if line_count >= self.victory:
+                victory_lines.append(line)
+
+        self.toggle_next_player()
+        if victory_lines:
+            self.over = True
+        return victory_lines
 
 
 class Move(TimeStampedModel):

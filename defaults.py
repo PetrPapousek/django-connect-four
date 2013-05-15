@@ -35,3 +35,4 @@ register_setting(
 
 register_setting(name="CHIP_WIDTH", default=52)
 register_setting(name="CHIP_HEIGHT", default=52)
+register_setting(name="VICTORY", default=4)

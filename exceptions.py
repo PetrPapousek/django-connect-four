@@ -4,3 +4,7 @@ __author__ = 'papousek'
 
 class AlreadyTaken(Exception):
     pass
+
+
+class AreadyOver(Exception):
+    pass

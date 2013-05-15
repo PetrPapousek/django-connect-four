@@ -4,7 +4,18 @@
 <script type="text/javascript"
         src="{{ STATIC_URL }}connect_four/js/jquery-1.9.1.min.js"></script>
 {% dajaxice_js_import %}
+{% if not game.over %}
 <script type="text/javascript">
+function Game() {
+    this.over = false;
+}
+Game.prototype.victory = function (victory) {
+    this.over = true;
+    alert(victory.player + ' won in lines: ' + victory.lines);
+    $('div.chip').off('mouseenter mouseleave');
+}
+var game = new Game();
+
 $(document).ready( function () {
     function get_chip(row, col) {
         return $('div.chip.row' + row + '.col' + col)
@@ -19,11 +30,18 @@ $(document).ready( function () {
         get_chip_column($(this)).removeClass('highlighted');
     }
     function cb_chip_click(data) {
-        var $chip = get_chip(data.move.row, data.move.col);
-        claim($chip, 2);
+        var move = data.move,
+            victory = data.victory;
+        if (move) {
+            var $chip = get_chip(data.move.row, data.move.col);
+            claim($chip, 2);
+        }
+        if (victory) {
+            game.victory(victory);
+        }
     }
     function claim($chip, player) {
-        if (!$chip.length) {
+        if (game.over || !$chip.length) {
             return;
         }
         $chip.addClass('player' + player);
@@ -48,6 +66,7 @@ $(document).ready( function () {
         .on('click', chip_click);
 });
 </script>
+{% endif%}
 {% endblock %}
 
 {% block extra_css %}
@@ -96,6 +115,13 @@ div.chip.player2 {
     {% endfor %}
 {% endfor %}
 </div>
+{% if game.over %}
+{% blocktrans %}
+    This game has ended.
+    Please, start a new one <a href="{{ new_game_url }}">here</a>.
+{% endblocktrans %}
+{% endif %}
+
 {% else %}
 {% blocktrans %}
     You don't have any game pending at the moment.

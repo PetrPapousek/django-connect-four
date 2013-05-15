@@ -55,8 +55,6 @@ class ThreadLocals(object):
         _thread_locals.user = getattr(request, 'user', None)
         _thread_locals.site = getattr(request, 'site', None)
         _thread_locals.session = getattr(request, 'session', None)
-        #        _thread_locals.app_label = lib.get_app_label(request)
-        #        _thread_locals.model_name = lib.get_model_name(request)
         _thread_locals.path = getattr(request, 'path', None)
         _thread_locals.params = getattr(request, 'GET', None)
         _thread_locals.post_data = getattr(request, 'POST', None)
