@@ -1,15 +1,11 @@
 #       -*- coding: utf-8 -*-
 from django import forms
-from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-from model_utils import Choices
 
 from connect_four.models import Game
 from connect_four.oponents import computer_opponent_easy, opponents
-
-__author__ = 'papousek'
 
 
 class NewGameForm(forms.ModelForm):
@@ -28,22 +24,13 @@ class NewGameForm(forms.ModelForm):
         self.request = request
         super(NewGameForm, self).__init__(*args, **kwargs)
 
-    def _post_clean(self):
+    def save(self, commit=True):
+        instance = super(NewGameForm, self).save(commit=False)
         if int(self.cleaned_data['opponent']) == opponents.computer_easy:
             self.instance.player2 = computer_opponent_easy
         self.instance.init_state()
         self.instance.user_create = self.request.user
         self.instance.player1 = self.request.user
-        super(NewGameForm, self)._post_clean()
-
-    # def save(self, commit=True):
-    #     return super(NewGameForm, self).save(commit)
-
-
-    # def clean(self):
-    #     cd = super(NewGameForm, self).clean()
-    #     if cd['opponent'] == opponents.computer_easy:
-    #         cd['player2'] = computer_opponent_easy
-    #     return cd
-
-
+        if commit:
+            instance.save()
+        return instance

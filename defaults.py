@@ -33,6 +33,6 @@ register_setting(
     default='new-game',
 )
 
-register_setting(name="CHIP_WIDTH", default=52)
-register_setting(name="CHIP_HEIGHT", default=52)
+register_setting(name="CHIP_WIDTH", default=50)
+register_setting(name="CHIP_HEIGHT", default=50)
 register_setting(name="VICTORY", default=4)

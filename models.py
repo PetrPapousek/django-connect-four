@@ -2,6 +2,7 @@
 import copy
 import random
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.translation import ugettext_lazy as _
@@ -74,11 +75,13 @@ class Game(TimeStampedModel):
     cols = models.PositiveIntegerField(
         verbose_name=_('width (places)'),
         default=settings.DEFAULT_BOARD_WIDTH,
+        validators=[MinValueValidator(4), MaxValueValidator(19)],
     )
 
     rows = models.PositiveIntegerField(
         verbose_name=_('height (places)'),
         default=settings.DEFAULT_BOARD_HEIGHT,
+        validators=[MinValueValidator(4), MaxValueValidator(20)],
     )
 
     state = JSONField(
@@ -86,7 +89,7 @@ class Game(TimeStampedModel):
     )
 
     victory = models.IntegerField(
-        editable=False,
+        verbose_name=_('chips connected for victory'),
         default=settings.VICTORY,
     )
 

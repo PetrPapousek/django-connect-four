@@ -1,5 +1,5 @@
 {% extends "pages/page.html" %}
-{% load connect_four_tags dajaxice_templatetags i18n %}
+{% load connect_four_tags dajaxice_templatetags i18n staticfiles %}
 {% block extra_js %}
 <script type="text/javascript"
         src="{{ STATIC_URL }}connect_four/js/jquery-1.9.1.min.js"></script>
@@ -13,6 +13,7 @@ Game.prototype.victory = function (victory) {
     this.over = true;
     alert(victory.player + ' won in lines: ' + victory.lines);
     $('div.chip').off('mouseenter mouseleave');
+    $('p.msg').html('{% blocktrans %} This game has ended. Please, start a new one <a href = "{{ new_game_url }}">here</a>. {% endblocktrans %}');
 }
 var game = new Game();
 
@@ -24,10 +25,14 @@ $(document).ready( function () {
         return $('.col' + $chip.data('col'));
     }
     function chip_over() {
-        get_chip_column($(this)).addClass('highlighted');
+        get_chip_column($(this))
+            .filter('.free')
+            .addClass('highlighted')
+            .first()
+            .addClass('last');
     }
     function chip_out() {
-        get_chip_column($(this)).removeClass('highlighted');
+        get_chip_column($(this)).removeClass('highlighted last');
     }
     function cb_chip_click(data) {
         var move = data.move,
@@ -75,16 +80,20 @@ div.board {
     width: {{ game.width_in_pixels }}px;
     height: {{ game.height_in_pixels }}px;
     position: relative;
-    background-image: url("{{ STATIC_URL }}connect_four/img/connect4Board.gif");
+{#    background-image: url("{{ STATIC_URL }}connect_four/img/connect4Board.gif");#}
 }
 div.chip {
     position: absolute;
     width: {{ CHIP_WIDTH }}px;
     height: {{ CHIP_HEIGHT }}px;
+{#    background-image: url("{{ STATIC_URL }}connect_four/img/chip.png");#}
 }
-div.chip.highlighted {
-    border: thick dotted black;
-{#    background-color: khaki;#}
+div.chip.highlighted.free {
+{#    border: thick dotted black;#}
+    background-image: url("{% static 'connect_four/img/vertical_line.png' %}");
+}
+div.chip.highlighted.free.last {
+    background-image: url("{% static 'connect_four/img/vertical_arrow.png' %}");
 }
 div.chip.player1 {
     background-color: khaki;
@@ -108,6 +117,7 @@ div.chip.player2 {
                    margin-top: {{ chip.margin_top }}px;"
             data-row="{{ chip.row }}" data-col="{{ chip.col }}"
             >
+        <img src="{{ STATIC_URL }}connect_four/img/chip.png" />
         </div>
 {#        <script type="text/javascript">#}
 {#        $('#{{ chip.id }}').data()#}
@@ -115,12 +125,15 @@ div.chip.player2 {
     {% endfor %}
 {% endfor %}
 </div>
+
+<p class="msg">
 {% if game.over %}
 {% blocktrans %}
     This game has ended.
     Please, start a new one <a href="{{ new_game_url }}">here</a>.
 {% endblocktrans %}
 {% endif %}
+</p>
 
 {% else %}
 {% blocktrans %}
