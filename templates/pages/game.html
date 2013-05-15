@@ -1,25 +1,51 @@
 {% extends "pages/page.html" %}
-{% load connect_four_tags dajaxice_templatetags %}
-{% spaceless %}
+{% load connect_four_tags dajaxice_templatetags i18n %}
 {% block extra_js %}
 <script type="text/javascript"
         src="{{ STATIC_URL }}connect_four/js/jquery-1.9.1.min.js"></script>
 {% dajaxice_js_import %}
 <script type="text/javascript">
 $(document).ready( function () {
+    function get_chip(row, col) {
+        return $('div.chip.row' + row + '.col' + col)
+    }
+    function get_chip_column($chip) {
+        return $('.col' + $chip.data('col'));
+    }
     function chip_over() {
-        $('.col' + $(this).data('col')).addClass('highlighted');
+        get_chip_column($(this)).addClass('highlighted');
     }
     function chip_out() {
-        $('.col' + $(this).data('col')).removeClass('highlighted');
+        get_chip_column($(this)).removeClass('highlighted');
+    }
+    function cb_chip_click(data) {
+        var $chip = get_chip(data.move.row, data.move.col);
+        claim($chip, 2);
+    }
+    function claim($chip, player) {
+        if (!$chip.length) {
+            return;
+        }
+        $chip.addClass('player' + player);
+        $chip.removeClass('free');
+        if (player === 1) {
+            Dajaxice.connect_four.claim(
+                cb_chip_click,
+                {row: $chip.data('row'), col: $chip.data('col')}
+            );
+        }
     }
     function chip_click() {
-
+        var $chip = $(this),
+            $free_chip = get_chip_column($chip).filter('.free').first()
+        if ($free_chip.length) {
+            claim($free_chip, 1);
+        }
     }
 
-    var $chip = $('div.chip');
-    $chip.hover(chip_over, chip_out);
-    $chip.on('click', chip_click)
+    $('div.chip')
+        .hover(chip_over, chip_out)
+        .on('click', chip_click);
 });
 </script>
 {% endblock %}
@@ -38,19 +64,27 @@ div.chip {
     height: {{ CHIP_HEIGHT }}px;
 }
 div.chip.highlighted {
+    border: thick dotted black;
+{#    background-color: khaki;#}
+}
+div.chip.player1 {
     background-color: khaki;
+}
+div.chip.player2 {
+    background-color: brown;
 }
 </style>
 {% endblock %}
 
 {% block main %}
 {#<img src="{{ STATIC_URL }}connect_four/img/connect4Board.gif"/>#}
+{% if game %}
 <div id="board" class="board">
 {% for row in game.get_state %}
     {% for chip in row %}
         <div
             id="{{ chip.id }}"
-            class="chip row{{ chip.row }} col{{ chip.col }}"
+            class="chip row{{ chip.row }} col{{ chip.col }}{{ chip.player_class }}"
             style="margin-left: {{ chip.margin_left }}px;
                    margin-top: {{ chip.margin_top }}px;"
             data-row="{{ chip.row }}" data-col="{{ chip.col }}"
@@ -62,5 +96,10 @@ div.chip.highlighted {
     {% endfor %}
 {% endfor %}
 </div>
+{% else %}
+{% blocktrans %}
+    You don't have any game pending at the moment.
+    Please, start a new one <a href="{{ new_game_url }}">here</a>.
+{% endblocktrans %}
+{% endif %}
 {% endblock %}
-{% endspaceless %}

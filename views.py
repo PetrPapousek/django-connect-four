@@ -18,11 +18,14 @@ class NewGameView(MezzaninePageProcessorViewMixin, CreateView):
     form_class = NewGameForm
 
     def get_success_url(self):
-        return reverse(
-            viewname="page",
-            urlconf="mezzanine.pages.urls",
-            kwargs={'slug': settings.SLUG_GAME}
-        )
+        return reverse(viewname="page",kwargs={'slug': settings.SLUG_GAME})
+
+    def get_form_kwargs(self):
+        kwargs = super(NewGameView, self).get_form_kwargs()
+        kwargs.update({
+            'request': self.request
+        })
+        return kwargs
         # return super(NewGameView, self).get_success_url()
 
     # success_url = settings.SLUG_GAME
@@ -34,7 +37,10 @@ class GameView(MezzaninePageProcessorViewMixin, DetailView):
     model = Game
 
     def get_object(self, queryset=None):
-        return self.model.objects.latest()
+        try:
+            return self.model.objects.latest()
+        except self.model.DoesNotExist:
+            pass
         # return super(GameView, self).get_object(queryset)
 
     def get_context_data(self, **kwargs):
@@ -42,6 +48,9 @@ class GameView(MezzaninePageProcessorViewMixin, DetailView):
         data.update({
             'CHIP_WIDTH': settings.CHIP_WIDTH,
             'CHIP_HEIGHT': settings.CHIP_HEIGHT,
+            'new_game_url': reverse(
+                viewname="page", kwargs={'slug': settings.SLUG_NEW_GAME}
+            ),
         })
         return data
 

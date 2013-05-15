@@ -24,11 +24,16 @@ class NewGameForm(forms.ModelForm):
     helper = FormHelper()
     helper.add_input(Submit('submit', 'Submit'))
 
+    def __init__(self, request=None, *args, **kwargs):
+        self.request = request
+        super(NewGameForm, self).__init__(*args, **kwargs)
+
     def _post_clean(self):
         if int(self.cleaned_data['opponent']) == opponents.computer_easy:
-            # cd['player2'] = computer_opponent_easy
             self.instance.player2 = computer_opponent_easy
         self.instance.init_state()
+        self.instance.user_create = self.request.user
+        self.instance.player1 = self.request.user
         super(NewGameForm, self)._post_clean()
 
     # def save(self, commit=True):

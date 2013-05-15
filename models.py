@@ -1,18 +1,27 @@
 #       -*- coding: utf-8 -*-
 import copy
+import random
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.query import QuerySet
 from django.utils.translation import ugettext_lazy as _
 
 # from jsonfield import JSONField
 from json_field import JSONField
+from model_utils.managers import PassThroughManager
 from model_utils.models import TimeStampedModel
 from mezzanine.pages.models import Page
 from mezzanine.conf import settings
+from connect_four.exceptions import AlreadyTaken
 
 from connect_four.threadlocals import get_current_user
 
 __author__ = 'papousek'
+
+
+class GameQuerySet(QuerySet):
+    def for_user(self, user):
+        return self.filter(player1=user)
 
 
 class Game(TimeStampedModel):
@@ -26,7 +35,7 @@ class Game(TimeStampedModel):
         verbose_name=_('created by'),
         related_name="created_game_set",
         editable=False,
-        default=get_current_user,
+        # default=get_current_user,
         null=True,
         blank=True,
     )
@@ -36,7 +45,7 @@ class Game(TimeStampedModel):
         verbose_name=_('player1'),
         related_name="player1_game_set",
         editable=False,
-        default=get_current_user,
+        # default=get_current_user,
         null=True,
         blank=True,
     )
@@ -50,12 +59,12 @@ class Game(TimeStampedModel):
         blank=True,
     )
 
-    width = models.PositiveIntegerField(
+    cols = models.PositiveIntegerField(
         verbose_name=_('width (places)'),
         default=settings.DEFAULT_BOARD_WIDTH,
     )
 
-    height = models.PositiveIntegerField(
+    rows = models.PositiveIntegerField(
         verbose_name=_('height (places)'),
         default=settings.DEFAULT_BOARD_HEIGHT,
     )
@@ -64,13 +73,15 @@ class Game(TimeStampedModel):
         editable=False,
     )
 
+    objects = PassThroughManager.for_queryset_class(GameQuerySet)()
+
     @property
     def width_in_pixels(self):
-        return settings.CHIP_WIDTH * self.width
+        return settings.CHIP_WIDTH * self.cols
 
     @property
     def height_in_pixels(self):
-        return settings.CHIP_HEIGHT * self.height
+        return settings.CHIP_HEIGHT * self.rows
 
     def get_state(self):
         state = copy.deepcopy(self.state)
@@ -81,10 +92,15 @@ class Game(TimeStampedModel):
         return state
 
     def get_initial_state(self):
-        return [[0] * self.instance.width] * self.instance.height
+        return [[0] * self.cols] * self.rows
 
     def init_state(self):
         self.state = self.get_initial_state()
+
+    def move(self, row, col, player):
+        if self.state[row][col]:
+            raise AlreadyTaken
+        self.state[row][col] = player
 
 
 class Move(TimeStampedModel):
@@ -135,8 +151,30 @@ class Chip(object):
 
     @property
     def id(self):
-        return u"chip-{{ 0 }}-{{ 1 }}".format(self.row, self.col)
+        return u"chip-{}-{}".format(self.row, self.col)
+
+    @property
+    def player_class(self):
+        return " player{}".format(self.player) if self.player else " free"
 
 
 class ComputerOpponentEasy(User):
-    pass
+    def get_move(self, game):
+        return self.get_random_move(game)
+
+    def get_random_move(self, game):
+        options = []
+        remaining = set(range(game.cols))
+        for rown, row in enumerate(game.state):
+            # check_col_numbers = copy.deepcopy(col_numbers)
+            found = set()
+            for coln in remaining:
+                player = row[coln]
+                if not player:
+                    options += [(rown, coln)]
+                    found.add(coln)
+            remaining.difference_update(found)
+            if not remaining:
+                break
+            # options += [(rown, coln) for coln, p in enumerate(row) if not p]
+        return random.choice(options)
