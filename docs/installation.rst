@@ -15,7 +15,7 @@ Add connect four (and dependencies) to your Installed apps::
     "json_field",
     "crispy_forms",
     "connect_four",
-    "..."
+    ...
 
 Activate your virtualenv and install requirements from file requirements.txt, for example by:
 

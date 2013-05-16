@@ -1,0 +1,10 @@
+Dependencies
+============
+Dependencies::
+
+    Django==1.5.1
+    Mezzanine==1.4.6
+    django-model-utils==1.3.1
+    django-json-field==0.5.2
+    django-crispy-forms==1.2.8
+    django-dajaxice==0.5.5

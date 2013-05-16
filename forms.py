@@ -5,7 +5,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
 from connect_four.models import Game
-from connect_four.oponents import computer_opponent_easy, opponents
+from connect_four.opponents import computer_opponent_easy, opponents
 
 
 class NewGameForm(forms.ModelForm):
