@@ -1,6 +1,7 @@
 #       -*- coding: utf-8 -*-
 import copy
 import random
+
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -8,17 +9,11 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.translation import ugettext_lazy as _
 
-# from jsonfield import JSONField
 from json_field import JSONField
 from model_utils.managers import PassThroughManager
 from model_utils.models import TimeStampedModel
-from mezzanine.pages.models import Page
 from mezzanine.conf import settings
 from connect_four.exceptions import AlreadyTaken, AreadyOver
-
-from connect_four.threadlocals import get_current_user
-
-__author__ = 'papousek'
 
 
 class GameQuerySet(QuerySet):
@@ -75,14 +70,20 @@ class Game(TimeStampedModel):
 
     cols = models.PositiveIntegerField(
         verbose_name=_('width (places)'),
-        default=settings.DEFAULT_BOARD_WIDTH,
-        validators=[MinValueValidator(4), MaxValueValidator(19)],
+        default=settings.BOARD_COLS_DEFAULT,
+        validators=[
+            MinValueValidator(settings.BOARD_COLS_MIN),
+            MaxValueValidator(settings.BOARD_COLS_MAX),
+        ],
     )
 
     rows = models.PositiveIntegerField(
         verbose_name=_('height (places)'),
-        default=settings.DEFAULT_BOARD_HEIGHT,
-        validators=[MinValueValidator(4), MaxValueValidator(20)],
+        default=settings.BOARD_ROWS_DEFAULT,
+        validators=[
+            MinValueValidator(settings.BOARD_ROWS_MIN),
+            MaxValueValidator(settings.BOARD_ROWS_MAX),
+        ],
     )
 
     state = JSONField(
@@ -91,7 +92,11 @@ class Game(TimeStampedModel):
 
     victory = models.IntegerField(
         verbose_name=_('chips connected for victory'),
-        default=settings.VICTORY,
+        default=settings.VICTORY_DEFAULT,
+        validators=[
+            MinValueValidator(settings.VICTORY_MIN),
+            MaxValueValidator(settings.VICTORY_MAX),
+        ],
     )
 
     over = models.BooleanField(
@@ -149,12 +154,6 @@ class Game(TimeStampedModel):
         if self.state[row][col]:
             raise AlreadyTaken
         self.state[row][col] = self.next_player
-        # lines = {
-        #     'horizontal': ((1, 0, 1, 0), (-1, 0, -1, 0)),
-        #     'vertical':   ((0, 1, 1, 0), (0, -1, -1, 0)),
-        #     'slash': ((1, 1, 1, 1), (-1, -1, -1, -1)),
-        #     'backslash': ((-1, 1, -1, 1), (1, -1, 1, -1)),
-        # }
         lines = {  # (row step, col step)
             'horizontal': (0, 1),  'vertical':  (1, 0),
             'slash':      (1, 1), 'backslash': (-1, 1),

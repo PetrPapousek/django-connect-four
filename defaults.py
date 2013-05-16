@@ -6,20 +6,6 @@ from mezzanine.conf import register_setting
 __author__ = 'papousek'
 
 register_setting(
-    name="DEFAULT_BOARD_WIDTH",
-    label=_('default board width'),
-    editable=True,
-    default=8,
-)
-
-register_setting(
-    name="DEFAULT_BOARD_HEIGHT",
-    label=_('default board height'),
-    editable=True,
-    default=6,
-)
-
-register_setting(
     name="SLUG_GAME",
     label=_('slug of page on which game should be displayed'),
     editable=True,
@@ -40,6 +26,81 @@ register_setting(
     default='game-history',
 )
 
-register_setting(name="CHIP_WIDTH", default=50)
-register_setting(name="CHIP_HEIGHT", default=50)
-register_setting(name="VICTORY", default=4)
+# CHIP SIZE
+register_setting(
+    name="CHIP_WIDTH",
+    label=_('chip width in pixels'),
+    editable=True,
+    default=50,
+)
+
+register_setting(
+    name="CHIP_HEIGHT",
+    label=_('chip height in pixels'),
+    editable=True,
+    default=50,
+)
+
+# VICTORY CONDITIONS
+register_setting(
+    name="VICTORY_MIN",
+    label=_('minimum cols of board'),
+    editable=True,
+    default=3,
+)
+
+register_setting(
+    name="VICTORY_MAX",
+    label=_('maximum validator'),
+    editable=True,
+    default=10,
+)
+register_setting(
+    name="VICTORY_DEFAULT",
+    label=_('default number of chips need to be connected for victory'),
+    editable=True,
+    default=4,
+)
+
+# BOARD SIZE
+register_setting(
+    name="BOARD_COLS_MIN",
+    label=_('minimum cols of board'),
+    editable=True,
+    default=3,
+)
+
+register_setting(
+    name="BOARD_COLS_MAX",
+    label=_('maximum cols of board'),
+    editable=True,
+    default=19,
+)
+
+register_setting(
+    name="BOARD_ROWS_MIN",
+    label=_('minimum rows of board'),
+    editable=True,
+    default=4,
+)
+
+register_setting(
+    name="BOARD_ROWS_MAX",
+    label=_('maximum rows of board'),
+    editable=True,
+    default=20,
+)
+
+register_setting(
+    name="BOARD_COLS_DEFAULT",
+    label=_('default board cols'),
+    editable=True,
+    default=8,
+)
+
+register_setting(
+    name="BOARD_ROWS_DEFAULT",
+    label=_('default board rows'),
+    editable=True,
+    default=6,
+)
