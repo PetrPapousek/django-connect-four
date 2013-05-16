@@ -273,3 +273,6 @@ class ComputerOpponentEasy(User):
             if not remaining:
                 break
         return random.choice(options)
+
+    def __str__(self):
+        return self.get_full_name()

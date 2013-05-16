@@ -119,6 +119,14 @@ div.chip.player2 {
 
 {% block main %}
 {% if game %}
+<div class="game-info">
+<table>
+    <tr><td>{% trans "player 1"%}:</td> <td>{{ player1_label }}</td></tr>
+    <tr><td>{% trans "player 2"%}:</td> <td>{{ player2_label }}</td></tr>
+    <tr><td>{% trans "chips needed" %}:</td> <td>{{ game.victory }}</td></tr>
+</table>
+</div>
+
 <div id="board" class="board">
 {% for row in game.get_state %}
     {% for chip in row %}

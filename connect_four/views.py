@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import CreateView
 from django.views.generic.dates import ArchiveIndexView
 from django.views.generic.detail import DetailView
+from django.utils.translation import ugettext_lazy as _
 
 from mezzanine.conf import settings
 
@@ -58,9 +59,13 @@ class GameView(MezzaninePageProcessorViewMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         data = super(GameView, self).get_context_data(**kwargs)
+        p2 = self.object.player2
+        player2_label = p2.get_full_name() if p2 else _('Unregistered')
         data.update({
             'CHIP_WIDTH': settings.CHIP_WIDTH,
             'CHIP_HEIGHT': settings.CHIP_HEIGHT,
+            'player1_label': self.object.player1 or _('Unregistered'),
+            'player2_label': player2_label,
             'new_game_url': reverse(
                 viewname="page", kwargs={'slug': settings.SLUG_NEW_GAME}
             ),
