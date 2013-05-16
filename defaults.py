@@ -23,7 +23,7 @@ register_setting(
     name="SLUG_GAME_ARCHIVE",
     label=_('slug of page on which game archive should be displayed'),
     editable=True,
-    default='game-history',
+    default='game-archive',
 )
 
 # CHIP SIZE
