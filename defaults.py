@@ -21,16 +21,23 @@ register_setting(
 
 register_setting(
     name="SLUG_GAME",
-    label=_('slug of site on which game should be displayed'),
+    label=_('slug of page on which game should be displayed'),
     editable=True,
     default='game',
 )
 
 register_setting(
     name="SLUG_NEW_GAME",
-    label=_('slug of site on which game should be displayed'),
+    label=_('slug of page on which new game form should be displayed'),
     editable=True,
     default='new-game',
+)
+
+register_setting(
+    name="SLUG_GAME_ARCHIVE",
+    label=_('slug of page on which game archive should be displayed'),
+    editable=True,
+    default='game-history',
 )
 
 register_setting(name="CHIP_WIDTH", default=50)

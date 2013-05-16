@@ -1,6 +1,8 @@
 #       -*- coding: utf-8 -*-
 from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 from django.views.generic import CreateView
+from django.views.generic.dates import ArchiveIndexView
 from django.views.generic.detail import DetailView
 
 from mezzanine.conf import settings
@@ -13,12 +15,12 @@ __author__ = 'papousek'
 
 
 class NewGameView(MezzaninePageProcessorViewMixin, CreateView):
-    template_name = 'pages/new_game.html'
+    template_name = 'connect_four/new_game.html'
     mezzanine_page_model = settings.SLUG_NEW_GAME
     form_class = NewGameForm
 
     def get_success_url(self):
-        return reverse(viewname="page",kwargs={'slug': settings.SLUG_GAME})
+        return reverse(viewname="page", kwargs={'slug': settings.SLUG_GAME})
 
     def get_form_kwargs(self):
         kwargs = super(NewGameView, self).get_form_kwargs()
@@ -26,22 +28,33 @@ class NewGameView(MezzaninePageProcessorViewMixin, CreateView):
             'request': self.request
         })
         return kwargs
-        # return super(NewGameView, self).get_success_url()
-
-    # success_url = settings.SLUG_GAME
 
 
 class GameView(MezzaninePageProcessorViewMixin, DetailView):
-    template_name = 'pages/game.html'
+    template_name = 'connect_four/game.html'
     mezzanine_page_model = settings.SLUG_GAME
     model = Game
 
+    def get_queryset(self):
+        queryset = super(GameView, self).get_queryset()
+        return queryset.for_user(self.request.user)
+
     def get_object(self, queryset=None):
+        if not queryset:
+            queryset = self.get_queryset()
+
+        id = self.request.GET.get('id')
+        if id:
+            return get_object_or_404(klass=queryset, pk=int(id))
+            # try:
+            #     return queryset.get(pk=int(id))
+            # except self.model.DoesNotExist:
+            #     raise
+
         try:
-            return self.model.objects.latest()
+            return queryset.latest()
         except self.model.DoesNotExist:
             pass
-        # return super(GameView, self).get_object(queryset)
 
     def get_context_data(self, **kwargs):
         data = super(GameView, self).get_context_data(**kwargs)
@@ -54,4 +67,14 @@ class GameView(MezzaninePageProcessorViewMixin, DetailView):
         })
         return data
 
+
+class GameArchiveView(MezzaninePageProcessorViewMixin, ArchiveIndexView):
+    template_name = 'connect_four/game_archive.html'
+    mezzanine_page_model = settings.SLUG_GAME_ARCHIVE
+    model = Game
+    date_field = 'created'
+
+    def get_queryset(self):
+        queryset = super(GameArchiveView, self).get_queryset()
+        return queryset.for_user(self.request.user)
 

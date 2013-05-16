@@ -1,0 +1,8 @@
+{% extends "pages/page.html" %}
+{% block main %}
+<ul>
+{% for game in object_list %}
+<li><a href="{{ game.get_absolute_url }}">{{ game }}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}

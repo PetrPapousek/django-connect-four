@@ -2,6 +2,7 @@
 import copy
 import random
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models.query import QuerySet
@@ -168,6 +169,15 @@ class Game(TimeStampedModel):
         if victory_lines:
             self.over = True
         return victory_lines
+
+    def get_absolute_url(self):
+        return "{}?id={}".format(
+            reverse('page', kwargs={'slug': settings.SLUG_GAME}),
+            self.pk
+        )
+
+    # def __unicode__(self):
+    #     return
 
 
 class Move(TimeStampedModel):
