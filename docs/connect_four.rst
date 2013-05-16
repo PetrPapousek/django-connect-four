@@ -4,7 +4,7 @@ Modules (apidoc & autodoc)
 :mod:`admin` Module
 -------------------
 
-.. automodule:: admin
+.. automodule:: connect_four.admin
     :members:
     :undoc-members:
     :show-inheritance:
@@ -12,7 +12,7 @@ Modules (apidoc & autodoc)
 :mod:`ajax` Module
 ------------------
 
-.. automodule:: .ajax
+.. automodule:: connect_four.ajax
     :members:
     :undoc-members:
     :show-inheritance:
