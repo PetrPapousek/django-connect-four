@@ -13,6 +13,7 @@ from json_field import JSONField
 from model_utils.managers import PassThroughManager
 from model_utils.models import TimeStampedModel
 from mezzanine.conf import settings
+
 from connect_four.exceptions import AlreadyTaken, AreadyOver
 
 
@@ -22,6 +23,9 @@ class GameQuerySet(QuerySet):
 
 
 class Game(TimeStampedModel):
+    """
+    Game representation, that holds all important information about the game.
+    """
     class Meta:
         verbose_name = _('game')
         verbose_name_plural = _('games')
@@ -108,18 +112,28 @@ class Game(TimeStampedModel):
 
     @property
     def width_in_pixels(self):
+        """
+        :return: width of board in pixels
+        """
         return settings.CHIP_WIDTH * self.cols
 
     @property
     def height_in_pixels(self):
+        """
+        :return: height of board in pixels
+        """
         return settings.CHIP_HEIGHT * self.rows
 
     def get_state(self):
+        """
+        Reads the simple representation of game state and converts each chip
+        on board to Chip instance.
+        :return: list of lists of Chip instances
+        """
         state = copy.deepcopy(self.state)
         for rown, row in enumerate(state):
             state[rown] = \
                 [Chip(p, rown, coln, self) for coln, p in enumerate(row)]
-
         return state
 
     def get_initial_state(self):
@@ -159,8 +173,8 @@ class Game(TimeStampedModel):
             'slash':      (1, 1), 'backslash': (-1, 1),
         }
         victory_lines = []
-        for line, setting in lines.items():
-            line_count = self.count_line(row, col, setting, self.next_player)
+        for line, step in lines.items():
+            line_count = self.count_line(row, col, step, self.next_player)
             if line_count >= self.victory:
                 victory_lines.append(line)
 
@@ -180,6 +194,7 @@ class Game(TimeStampedModel):
 
 
 class Move(TimeStampedModel):
+    """Save the game move order for replay."""
     class Meta:
         verbose_name = _('move')
         verbose_name_plural = _('moves')
@@ -204,6 +219,7 @@ class Move(TimeStampedModel):
 
 
 class Chip(object):
+    """Not a model, just helper class for chip representation."""
     width = settings.CHIP_WIDTH
     height = settings.CHIP_HEIGHT
 
@@ -215,26 +231,27 @@ class Chip(object):
 
     @property
     def margin_left(self):
+        """For css ``margin-left``"""
         return self.width * self.col
 
     @property
-    def margin_bottom(self):
-        return self.height * self.row
-
-    @property
     def margin_top(self):
-        return self.game.height_in_pixels - self.height - self.margin_bottom
+        """For css ``margin-top``"""
+        return self.game.height_in_pixels - self.height - self.height * self.row
 
     @property
     def id(self):
+        """For DOM attribute ``id``"""
         return u"chip-{}-{}".format(self.row, self.col)
 
     @property
     def player_class(self):
+        """Css class that marks chip owner."""
         return " player{}".format(self.player) if self.player else " free"
 
 
 class ComputerOpponentEasy(User):
+    """Computer opponent representation."""
     def get_move(self, game):
         return self.get_random_move(game)
 
@@ -252,5 +269,4 @@ class ComputerOpponentEasy(User):
             remaining.difference_update(found)
             if not remaining:
                 break
-            # options += [(rown, coln) for coln, p in enumerate(row) if not p]
         return random.choice(options)
