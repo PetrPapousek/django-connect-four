@@ -1,18 +1,25 @@
 #       -*- coding: utf-8 -*-
 import json
 
-from dajaxice.decorators import dajaxice_register
 from django.http.response import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
+
+from dajaxice.decorators import dajaxice_register
+
 from connect_four.exceptions import AlreadyTaken, AreadyOver
-
 from connect_four.models import Game
-
-__author__ = 'papousek'
 
 
 @dajaxice_register(name='connect_four.claim')
-def claim(request, row, col):
-    game = Game.objects.for_user(request.user).latest()
+def claim(request, game, row, col, player):
+    queryset = Game.objects.for_user(request.user)
+    # if request.user:
+    #     queryset = Game.objects.for_user(request.user)
+    # else:
+    #     queryset = Game.objects.for_anonymous()
+
+    # game = queryset.latest()
+    game = get_object_or_404(klass=queryset, pk=game)
     victory_player = None
     response_dict = {}
 

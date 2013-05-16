@@ -69,10 +69,12 @@ ConnectFour.prototype.claim = function ($chip, player) {
     $chip.addClass('player' + player);
     $chip.removeClass('free');
     if (player === 1) {
-        Dajaxice.connect_four.claim(
-            cb_chip_click,
-            {row: $chip.data('row'), col: $chip.data('col')}
-        );
+        Dajaxice.connect_four.claim(cb_chip_click, {
+            game: this.pk,
+            row: $chip.data('row'),
+            col: $chip.data('col'),
+            player: player
+        });
     }
 };
 
