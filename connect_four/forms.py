@@ -26,12 +26,15 @@ class NewGameForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super(NewGameForm, self).save(commit=False)
-        if int(self.cleaned_data['opponent']) == opponents.computer_easy:
+        opponent = int(self.cleaned_data['opponent'])
+        if opponent == opponents.computer_easy:
             from connect_four.opponents import get_computer_opponent
-            self.instance.player2 = get_computer_opponent()
+            self.instance.player2 = get_computer_opponent(
+                opponents.computer_easy)
         self.instance.init_state()
-        self.instance.user_create = self.request.user
-        self.instance.player1 = self.request.user
+        if self.request.user.is_authenticated():
+            self.instance.user_create = self.request.user
+            self.instance.player1 = self.request.user
         if commit:
             instance.save()
         return instance

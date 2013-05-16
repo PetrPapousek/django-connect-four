@@ -19,7 +19,10 @@ from connect_four.exceptions import AlreadyTaken, AreadyOver
 
 class GameQuerySet(QuerySet):
     def for_user(self, user):
-        return self.filter(player1=user)
+        if user.is_authenticated():
+            return self.filter(player1=user)
+        else:
+            return self.filter(player1__isnull=True)
 
 
 class Game(TimeStampedModel):
