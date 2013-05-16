@@ -33,7 +33,9 @@ Contents:
 .. toctree::
    :maxdepth: 4
 
+   installation
    settings
+   dependencies
    connect_four
 
 
