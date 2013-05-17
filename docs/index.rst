@@ -10,17 +10,18 @@ Connect four is a django application, that allows users of your site to play
 
 Features:
  * user can play against computer opponent
+ * two people can play against each other on same computer
  * scalable board size (min, max and default values in :ref:`settings`)
  * scalable number of chips connected for victory (min, max and default values in :ref:`settings`)
  * user can have more games opened
  * game archive
 
 Todo list:
- * hot seat mode (two players on one computer)
  * two users over network
  * history of moves + replay game
  * statistics in user profile
  * users can pick colour of chips
+ * tests
 
 Application is easily integrable to `Mezzanine CMS <http://mezzanine.jupo.org/>`_,
 just set the slug of page where You want to have game running ``new-game``, ``game`` and
