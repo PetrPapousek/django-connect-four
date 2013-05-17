@@ -12,8 +12,6 @@ from connect_four.forms import NewGameForm
 from connect_four.helpers import MezzaninePageProcessorViewMixin
 from connect_four.models import Game
 
-__author__ = 'papousek'
-
 
 class NewGameView(MezzaninePageProcessorViewMixin, CreateView):
     template_name = 'connect_four/new_game.html'

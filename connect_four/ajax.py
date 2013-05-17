@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 
 from dajaxice.decorators import dajaxice_register
 
-from connect_four.exceptions import AlreadyTaken, AreadyOver
+from connect_four.exceptions import AlreadyTaken, AlreadyOver
 from connect_four.models import Game
 
 
@@ -25,7 +25,7 @@ def claim(request, game, row, col, player):
 
     try:
         victory_lines = game.move(row, col)
-    except (IndexError, AlreadyTaken, AreadyOver):
+    except (IndexError, AlreadyTaken, AlreadyOver):
         return HttpResponseBadRequest
 
     if victory_lines:

@@ -1,10 +1,9 @@
 #       -*- coding: utf-8 -*-
-__author__ = 'papousek'
 
 
 class AlreadyTaken(Exception):
     pass
 
 
-class AreadyOver(Exception):
+class AlreadyOver(Exception):
     pass

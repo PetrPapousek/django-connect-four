@@ -3,8 +3,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from mezzanine.conf import register_setting
 
-__author__ = 'papousek'
-
 register_setting(
     name="SLUG_GAME",
     label=_('slug of page on which game should be displayed'),

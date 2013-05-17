@@ -14,7 +14,7 @@ from model_utils.managers import PassThroughManager
 from model_utils.models import TimeStampedModel
 from mezzanine.conf import settings
 
-from connect_four.exceptions import AlreadyTaken, AreadyOver
+from connect_four.exceptions import AlreadyTaken, AlreadyOver
 
 
 class GameQuerySet(QuerySet):
@@ -167,7 +167,7 @@ class Game(TimeStampedModel):
 
     def move(self, row, col):
         if self.over:
-            raise AreadyOver
+            raise AlreadyOver
         if self.state[row][col]:
             raise AlreadyTaken
         self.state[row][col] = self.next_player

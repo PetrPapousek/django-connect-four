@@ -3,8 +3,6 @@ from functools import update_wrapper
 from django.utils.decorators import classonlymethod
 from mezzanine.pages.page_processors import processor_for
 
-__author__ = 'papousek'
-
 
 class MezzaninePageProcessorViewMixin(object):
 

@@ -5,8 +5,6 @@ from model_utils import Choices
 
 from connect_four.models import ComputerOpponentEasy
 
-__author__ = 'papousek'
-
 opponents = Choices(
     (1, 'computer_easy', _('computer (easy)')),
     (2, 'computer_hard', _('computer (hard)')),
