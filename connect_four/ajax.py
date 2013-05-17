@@ -20,34 +20,26 @@ def claim(request, game, row, col, player):
 
     # game = queryset.latest()
     game = get_object_or_404(klass=queryset, pk=game)
-    victory_player = None
     response_dict = {}
 
     try:
-        victory_lines = game.move(row, col)
+        victory = game.move(row, col)
     except (IndexError, AlreadyTaken, AlreadyOver):
         return HttpResponseBadRequest
 
-    if victory_lines:
-        victory_player = 'player1'
-    else:
+    if not victory:
         # computer move?
         try:
-            row, col = game.player2.computeropponenteasy.get_move(game)
+            row, col = game.player2.computeropponent.get_move(game)
         except AttributeError:
-            # hot seat player
+            # human opponent
             pass
         else:
-            victory_lines = game.move(row, col)
-            if victory_lines:
-                victory_player = 'player2'
-            response_dict = {'move': {'row': row, 'col': col}}
+            victory = game.move(row, col)
+            response_dict['move'] = {'row': row, 'col': col}
 
     game.save()
 
-    if victory_player:
-        response_dict['victory'] = {
-            'player': victory_player,
-            'lines': victory_lines,
-        }
+    if victory:
+        response_dict['victory'] = victory
     return json.dumps(response_dict)

@@ -4,7 +4,7 @@
 <script type="text/javascript"
         src="{{ STATIC_URL }}connect_four/js/jquery-1.9.1.min.js"></script>
 {% dajaxice_js_import %}
-{% if not game.over %}
+{% if game and not game.over %}
 <script type="text/javascript">
 function chip_over() {
     connect_four.get_chip_column($(this))
@@ -19,8 +19,7 @@ function chip_out() {
 }
 
 function cb_chip_click(data) {
-    var move = data.move,
-            victory = data.victory;
+    var move = data.move, victory = data.victory;
     if (move) {
         var $chip = connect_four.get_chip(data.move.row, data.move.col);
         connect_four.claim($chip, 2);
@@ -47,20 +46,24 @@ ConnectFour.prototype.init = function () {
     this.chips
         .hover(chip_over, chip_out)
         .on('click', chip_click);
-}
+};
 ConnectFour.prototype.get_chip = function (row, col) {
     return this.chips.filter('.row' + row + '.col' + col);
-}
+};
 ConnectFour.prototype.get_chip_column = function ($chip) {
     return this.chips.filter('.col' + $chip.data('col'));
-}
+};
 ConnectFour.prototype.victory = function (victory) {
     this.over = true;
-    alert(victory.player + ' won in lines: ' + victory.lines);
-    this.chips.off('mouseenter mouseleave');
-    $('p.msg').html('{% blocktrans %}' +
-        ' This game has ended. Please, start a new one ' +
-        '<a href = "{{ new_game_url }}">here</a>. {% endblocktrans %}');
+    this.chips
+        .off('mouseenter mouseleave')
+        .removeClass('highlighted');
+    $(victory.coords).each(function (i, v) {
+        connect_four.get_chip(v[0], v[1]).addClass('victory');
+    });
+{#    alert(victory.player + ' won in line: ' + victory.line);#}
+    alert(victory.message);
+    $('p.msg').html(victory.message);
 };
 ConnectFour.prototype.claim = function ($chip, player) {
     if (this.over || !$chip.length) {
@@ -108,11 +111,17 @@ div.chip.highlighted.free {
 div.chip.highlighted.free.last {
     background-image: url("{{ STATIC_URL }}connect_four/img/chip.png"), url("{% static 'connect_four/img/vertical_arrow.png' %}");
 }
-div.chip.player1 {
+.player1 {
     background-color: khaki;
 }
-div.chip.player2 {
+.player2 {
     background-color: brown;
+}
+div.chip.victory {
+    background-image: url("{{ STATIC_URL }}connect_four/img/check-mark.png"), url("{{ STATIC_URL }}connect_four/img/chip.png");
+}
+td.player1, td.player2 {
+    width: 50px;
 }
 </style>
 {% endblock %}
@@ -121,8 +130,8 @@ div.chip.player2 {
 {% if game %}
 <div class="game-info">
 <table>
-    <tr><td>{% trans "player 1"%}:</td> <td>{{ player1_label }}</td></tr>
-    <tr><td>{% trans "player 2"%}:</td> <td>{{ player2_label }}</td></tr>
+    <tr><td>{% trans "player 1"%}:</td> <td>{{ player1_label }}</td> <td class="player1"></td></tr>
+    <tr><td>{% trans "player 2"%}:</td> <td>{{ player2_label }}</td> <td class="player2"></td></tr>
     <tr><td>{% trans "chips needed" %}:</td> <td>{{ game.victory }}</td></tr>
 </table>
 </div>
@@ -132,7 +141,7 @@ div.chip.player2 {
     {% for chip in row %}
         <div
             id="{{ chip.id }}"
-            class="chip row{{ chip.row }} col{{ chip.col }}{{ chip.player_class }}"
+            class="chip row{{ chip.row }} col{{ chip.col }}{{ chip.player_class }}{{ chip.victory_class }}"
             style="margin-left: {{ chip.margin_left }}px;
                    margin-top: {{ chip.margin_top }}px;"
             data-row="{{ chip.row }}" data-col="{{ chip.col }}"
@@ -143,18 +152,10 @@ div.chip.player2 {
 </div>
 
 <p class="msg">
-{% if game.over %}
-{% blocktrans %}
-    This game has ended.
-    Please, start a new one <a href="{{ new_game_url }}">here</a>.
-{% endblocktrans %}
-{% endif %}
+    {% if game.over %} {{ game.get_over_message|safe }} {% endif %}
 </p>
 
 {% else %}
-{% blocktrans %}
-    You don't have any game pending at the moment.
-    Please, start a new one <a href="{{ new_game_url }}">here</a>.
-{% endblocktrans %}
+{{ view.model.get_no_games_message|safe }}
 {% endif %}
 {% endblock %}

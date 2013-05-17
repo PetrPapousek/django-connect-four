@@ -102,3 +102,10 @@ register_setting(
     editable=True,
     default=6,
 )
+
+register_setting(
+    name="CUSTOM_DATETIME_FORMAT",
+    label=_('date format'),
+    editable=True,
+    default='%Y-%m-%d %H:%M',
+)

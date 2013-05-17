@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models.query import QuerySet
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from json_field import JSONField
@@ -15,6 +16,7 @@ from model_utils.models import TimeStampedModel
 from mezzanine.conf import settings
 
 from connect_four.exceptions import AlreadyTaken, AlreadyOver
+import opponents
 
 
 class GameQuerySet(QuerySet):
@@ -97,6 +99,10 @@ class Game(TimeStampedModel):
         editable=False,
     )
 
+    victory_coords = JSONField(
+        editable=False,
+    )
+
     victory = models.IntegerField(
         verbose_name=_('chips connected for victory'),
         default=settings.VICTORY_DEFAULT,
@@ -112,6 +118,15 @@ class Game(TimeStampedModel):
     )
 
     objects = PassThroughManager.for_queryset_class(GameQuerySet)()
+
+    @classmethod
+    def get_no_games_message(cls):
+        return _(
+            u"You don't have any game at the moment. "
+            u"Please, start a new one <a href =\"{}\" >here</a>."
+        ).format(
+            reverse(viewname="page", kwargs={'slug': settings.SLUG_NEW_GAME})
+        )
 
     @property
     def width_in_pixels(self):
@@ -151,40 +166,57 @@ class Game(TimeStampedModel):
     def count_direction(self, row, col, row_step, col_step, player):
         try:
             if self.state[row][col] == player:
-                return self.count_direction(
+                (coords, points) = self.count_direction(
                     row + row_step, col + col_step,
-                    row_step, col_step, player) + 1
+                    row_step, col_step, player)
+
+                return coords + [(row, col)], points + 1
             else:
-                return 0
+                return [], 0
         except IndexError:
-            return 0
+            return [], 0
 
     def count_line(self, row, col, s, p):
-        count = 1
-        count += self.count_direction(row + s[0], col + s[1], s[0], s[1], p)
-        count += self.count_direction(row - s[0], col - s[1], -s[0], -s[1], p)
-        return count
+        points = 1
+        coords = [(row, col)]
+        rc, rp = self.count_direction(row + s[0], col + s[1], +s[0], +s[1], p)
+        coords += rc
+        points += rp
+        rc, rp = self.count_direction(row - s[0], col - s[1], -s[0], -s[1], p)
+        coords += rc
+        points += rp
+        return coords, points
 
     def move(self, row, col):
         if self.over:
             raise AlreadyOver
         if self.state[row][col]:
             raise AlreadyTaken
-        self.state[row][col] = self.next_player
+        player = self.next_player
+        self.state[row][col] = player
         lines = {  # (row step, col step)
             'horizontal': (0, 1),  'vertical':  (1, 0),
             'slash':      (1, 1), 'backslash': (-1, 1),
         }
-        victory_lines = []
-        for line, step in lines.items():
-            line_count = self.count_line(row, col, step, self.next_player)
-            if line_count >= self.victory:
-                victory_lines.append(line)
+        victory = {}
+        for line, steps in lines.items():
+            coords, points = self.count_line(row, col, steps, player)
+            if points >= self.victory:
+                victory.update({
+                    'points': points,
+                    'line': line,
+                    'coords': coords,
+                })
+                break
 
-        self.toggle_next_player()
-        if victory_lines:
+        if victory:
             self.over = True
-        return victory_lines
+            self.player_won = self.player1 if player == 1 else self.player2
+            self.victory_coords = victory['coords']
+            victory['message'] = self.get_over_message(),
+        else:
+            self.toggle_next_player()
+        return victory
 
     def get_absolute_url(self):
         return "{}?id={}".format(
@@ -192,8 +224,29 @@ class Game(TimeStampedModel):
             self.pk
         )
 
-    # def __unicode__(self):
-    #     return
+    def get_over_message(self, with_link=True):
+        link = "."
+        if with_link:
+            link = " <a href =\"{}\" >here</a>.".format(
+                reverse(
+                    viewname="page", kwargs={'slug': settings.SLUG_NEW_GAME}
+                )
+            )
+
+        return _(
+            u"This game is over, player {} won. Please, start a new one{}"
+        ).format(self.player_won, link)
+
+    def __unicode__(self):
+        return u"[{}] {} vs {} {}({}x{}, {} to win)".format(
+            self.created.strftime(settings.CUSTOM_DATETIME_FORMAT),
+            self.player1,
+            self.player2,
+            "winner: {} ".format(self.player_won) if self.player_won else "",
+            self.rows,
+            self.cols,
+            self.victory,
+        )
 
 
 class Move(TimeStampedModel):
@@ -234,12 +287,12 @@ class Chip(object):
 
     @property
     def margin_left(self):
-        """For css ``margin-left``"""
+        """For css property ``margin-left``"""
         return self.width * self.col
 
     @property
     def margin_top(self):
-        """For css ``margin-top``"""
+        """For css property ``margin-top``"""
         return self.game.height_in_pixels - self.height - self.height * self.row
 
     @property
@@ -252,9 +305,20 @@ class Chip(object):
         """Css class that marks chip owner."""
         return " player{}".format(self.player) if self.player else " free"
 
+    @property
+    def victory_class(self):
+        """Css class that marks chip as winning."""
+        victory_coords = self.game.victory_coords
+        return " victory" if [self.row, self.col] in victory_coords else ""
 
-class ComputerOpponentEasy(User):
+
+class ComputerOpponent(User):
     """Computer opponent representation."""
+    difficulty = models.IntegerField(
+        choices=opponents.opponents,
+        editable=False,
+    )
+
     def get_move(self, game):
         return self.get_random_move(game)
 

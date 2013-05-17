@@ -57,6 +57,8 @@ class GameView(MezzaninePageProcessorViewMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         data = super(GameView, self).get_context_data(**kwargs)
+        if not self.object:
+            return data
         p2 = self.object.player2
         player2_label = p2.get_full_name() if p2 else _('Unregistered')
         data.update({
@@ -64,9 +66,7 @@ class GameView(MezzaninePageProcessorViewMixin, DetailView):
             'CHIP_HEIGHT': settings.CHIP_HEIGHT,
             'player1_label': self.object.player1 or _('Unregistered'),
             'player2_label': player2_label,
-            'new_game_url': reverse(
-                viewname="page", kwargs={'slug': settings.SLUG_NEW_GAME}
-            ),
+
         })
         return data
 

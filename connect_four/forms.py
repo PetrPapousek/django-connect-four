@@ -14,7 +14,7 @@ class NewGameForm(forms.ModelForm):
 
     opponent = forms.ChoiceField(
         choices=opponents,
-        initial=opponents.computer_easy,
+        initial=opponents.computer_easiest,
     )
 
     helper = FormHelper()
@@ -27,10 +27,9 @@ class NewGameForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super(NewGameForm, self).save(commit=False)
         opponent = int(self.cleaned_data['opponent'])
-        if opponent == opponents.computer_easy:
-            from connect_four.opponents import get_computer_opponent
-            self.instance.player2 = get_computer_opponent(
-                opponents.computer_easy)
+        # if opponent == opponents.computer_easiest:
+        from connect_four.opponents import get_computer_opponent
+        self.instance.player2 = get_computer_opponent(opponent)
         self.instance.init_state()
         if self.request.user.is_authenticated():
             self.instance.user_create = self.request.user
