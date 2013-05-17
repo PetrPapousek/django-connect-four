@@ -23,10 +23,12 @@ Todo list:
  * users can pick colour of chips
 
 Application is easily integrable to `Mezzanine CMS <http://mezzanine.jupo.org/>`_,
-but if You don't want to use it, You can use included :mod:`connect_four.views`
-directly.
+just set the slug of page where You want to have game running ``new-game``, ``game`` and
+``game-archive`` (if You want different slugs, see Configuration page)
 
-Installation and configuration is described in following modules.
+If You don't want to use Mezzanine, You can use included :mod:`connect_four.views` directly.
+
+Installation and configuration is described in following doc pages.
 
 Contents:
 

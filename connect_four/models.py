@@ -213,7 +213,7 @@ class Game(TimeStampedModel):
             self.over = True
             self.player_won = self.player1 if player == 1 else self.player2
             self.victory_coords = victory['coords']
-            victory['message'] = self.get_over_message(),
+            victory['message'] = self.get_over_message(with_link=False),
         else:
             self.toggle_next_player()
         return victory
@@ -235,13 +235,13 @@ class Game(TimeStampedModel):
 
         return _(
             u"This game is over, player {} won. Please, start a new one{}"
-        ).format(self.player_won, link)
+        ).format(self.player_won or _('Unregistered'), link)
 
     def __unicode__(self):
         return u"[{}] {} vs {} {}({}x{}, {} to win)".format(
             self.created.strftime(settings.CUSTOM_DATETIME_FORMAT),
-            self.player1,
-            self.player2,
+            self.player1 or _('Unregistered'),
+            self.player2 or _('Unregistered'),
             "winner: {} ".format(self.player_won) if self.player_won else "",
             self.rows,
             self.cols,

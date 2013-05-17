@@ -1,3 +1,5 @@
+`Documentation available at Read the Docs. <http://http://django-connect-four.readthedocs.org/>`_
+
 django-connect-four
 ===================
 
@@ -6,20 +8,23 @@ Django application, that allows users of your site to play
 
 Features:
  * user can play against computer opponent
+ * two people can play against each other on same computer
  * scalable board size (min, max and default values)
  * scalable number of chips connected for victory (min, max and default values)
  * user can have more games opened
  * game archive
 
 Todo list:
- * hot seat mode (two players on one computer)
  * two users over network
  * history of moves + replay game
  * statistics in user profile
  * users can pick colour of chips
 
 Application is easily integrable to `Mezzanine CMS <http://mezzanine.jupo.org/>`_,
-but if You don't want to use it, You can use included views directly.
+just set the slug of page where You want to have game running ``new-game``, ``game`` and
+``game-archive`` (if You want different slugs, see Configuration doc page).
+
+If You don't want to use Mezzanine, You can use included views directly.
 
 Installation
 ============

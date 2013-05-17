@@ -8,12 +8,12 @@ opponents = Choices(
     (1, 'computer_easiest', _('computer easiest (random moves)')),
     # (2, 'computer_easy', _('computer easy (basic intelligence)')),
     # (3, 'computer_medium', _('computer medium (better intelligence)')),
-    # (4, 'human_hotseat', _('human (same computer)')),
+    (4, 'human_hotseat', _('human (same computer)')),
     # (5, 'human_network', _('human (network)')),
 )
 
 computer_opponents = (
-    opponents.computer_easiest
+    opponents.computer_easiest,
 )
 
 
