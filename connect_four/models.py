@@ -142,6 +142,15 @@ class Game(TimeStampedModel):
         """
         return settings.CHIP_HEIGHT * self.rows
 
+    @property
+    def is_draw(self):
+        highest_row = self.rows - 1
+        for col in range(self.cols):
+            if not self.state[highest_row][col]:
+                return False
+        return True
+
+
     def get_state(self):
         """
         Reads the simple representation of game state and converts each chip
@@ -199,6 +208,7 @@ class Game(TimeStampedModel):
             'slash':      (1, 1), 'backslash': (-1, 1),
         }
         victory = {}
+        draw = {}
         for line, steps in lines.items():
             coords, points = self.count_line(row, col, steps, player)
             if points >= self.victory:
@@ -213,10 +223,13 @@ class Game(TimeStampedModel):
             self.over = True
             self.player_won = self.player1 if player == 1 else self.player2
             self.victory_coords = victory['coords']
-            victory['message'] = self.get_over_message(with_link=False),
+            victory['message'] = self.get_over_message(with_link=False)
         else:
+            if self.is_draw:
+                self.over = True
+                draw['message'] = self.get_over_message(with_link=False)
             self.toggle_next_player()
-        return victory
+        return victory, draw
 
     def get_absolute_url(self):
         return "{}?id={}".format(
@@ -233,9 +246,14 @@ class Game(TimeStampedModel):
                 )
             )
 
+        result = "no winner"
+        if self.victory_coords:
+            result = u"player {} won".format(
+                self.player_won or _('Unregistered'))
+
         return _(
-            u"This game is over, player {} won. Please, start a new one{}"
-        ).format(self.player_won or _('Unregistered'), link)
+            u"This game is over, {}. Please, start a new game{}"
+        ).format(result, link)
 
     def __unicode__(self):
         return u"[{}] {} vs {} {}({}x{}, {} to win)".format(

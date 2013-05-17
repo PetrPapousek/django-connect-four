@@ -19,13 +19,15 @@ function chip_out() {
 }
 
 function cb_chip_click(data) {
-    var move = data.move, victory = data.victory;
+    var move = data.move, victory = data.victory, draw = data.draw;
     if (move) {
         var $chip = connect_four.get_chip(data.move.row, data.move.col);
         connect_four.claim($chip, 2);
     }
     if (victory) {
         connect_four.victory(victory);
+    } else if (draw) {
+        connect_four.draw(draw);
     }
 }
 
@@ -56,16 +58,22 @@ ConnectFour.prototype.get_chip_column = function ($chip) {
     return this.chips.filter('.col' + $chip.data('col'));
 };
 ConnectFour.prototype.victory = function (victory) {
+    $(victory.coords).each(function (i, v) {
+        connect_four.get_chip(v[0], v[1]).addClass('victory');
+    });
+    this.game_over(victory.message);
+};
+ConnectFour.prototype.draw = function (draw) {
+    this.game_over(draw.message);
+}
+ConnectFour.prototype.game_over = function (message) {
     this.over = true;
     this.chips
         .off('mouseenter mouseleave')
         .removeClass('highlighted');
-    $(victory.coords).each(function (i, v) {
-        connect_four.get_chip(v[0], v[1]).addClass('victory');
-    });
-    $('p.msg').html(victory.message);
-    alert(victory.message);
-};
+    $('p.msg').html(message);
+    alert(message);
+}
 ConnectFour.prototype.toggle_next_player = function () {
     this.next_player = (this.next_player === 1) ? 2 : 1;
     return this.next_player;
