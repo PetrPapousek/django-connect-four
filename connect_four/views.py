@@ -76,6 +76,7 @@ class GameArchiveView(MezzaninePageProcessorViewMixin, ArchiveIndexView):
     mezzanine_page_model = settings.SLUG_GAME_ARCHIVE
     model = Game
     date_field = 'created'
+    allow_empty = True
 
     def get_queryset(self):
         queryset = super(GameArchiveView, self).get_queryset()
