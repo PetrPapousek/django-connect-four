@@ -11,6 +11,7 @@ Connect four is a django application, that allows users of your site to play
 Features:
  * user can play against computer opponent
  * two people can play against each other on same computer
+ * both registered and unregistered users can play
  * scalable board size (min, max and default values in :ref:`settings`)
  * scalable number of chips connected for victory (min, max and default values in :ref:`settings`)
  * user can have more games opened
