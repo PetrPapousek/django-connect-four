@@ -53,7 +53,7 @@ Modules (apidoc & autodoc)
 --------------------
 
 .. automodule:: connect_four.models
-    :members: GameQuerySet, Game, Chip, Move, ComputerOpponentEasy
+    :members: GameQuerySet, Game, Chip, Move, ComputerOpponent
     :undoc-members:
     :show-inheritance:
 

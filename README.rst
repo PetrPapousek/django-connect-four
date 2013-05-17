@@ -24,11 +24,19 @@ but if You don't want to use it, You can use included views directly.
 Installation
 ============
 
-Get a fresh clone from repository::
+Installation can be done by::
 
-   git clone git@github.com:PetrPapousek/django-connect-four.git
+    # Get a fresh clone from repo
+    git clone git@github.com:PetrPapousek/django-connect-four.git
 
-and place it to Your Python path.
+    # Activate your virtualenv and install package, for example by::
+    virtualenv connect_four_virtualenv
+    source connect_four_virtualenv/bin/activate
+    cd django-connect-four
+    python setup.py install
+
+    # Install requirements from file requirements.txt, for example by:
+    pip install -r requirements.txt
 
 Add connect four (and dependencies) to your Installed apps::
 
@@ -40,9 +48,6 @@ Add connect four (and dependencies) to your Installed apps::
     "connect_four",
     ...
 
-Activate your virtualenv and install requirements from file requirements.txt, for example by:
-
-    pip install -r connect_four/requirements.txt
 
 Run syncdb::
 
