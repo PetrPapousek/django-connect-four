@@ -8,6 +8,8 @@ Welcome to Connect four's documentation!
 Connect four is a django application, that allows users of your site to play
 `connect four game <http://en.wikipedia.org/wiki/Connect_Four>`_.
 
+.. image:: connect_four_screen.png
+
 Features:
  * user can play against computer opponent
  * two people can play against each other on same computer
