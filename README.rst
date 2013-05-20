@@ -1,4 +1,4 @@
-`Documentation available at Read the Docs. <http://http://django-connect-four.readthedocs.org/>`_
+`Documentation available at Read the Docs. <http://django-connect-four.readthedocs.org/>`_
 
 django-connect-four
 ===================
