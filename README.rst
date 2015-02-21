@@ -1,5 +1,3 @@
-`Documentation available at Read the Docs. <http://django-connect-four.readthedocs.org/>`_
-
 django-connect-four
 ===================
 
@@ -25,9 +23,12 @@ Todo list:
 
 Application is easily integrable to `Mezzanine CMS <http://mezzanine.jupo.org/>`_,
 just set the slug of page where You want to have game running ``new-game``, ``game`` and
-``game-archive`` (if You want different slugs, see Configuration doc page).
+``game-archive`` (if You want different slugs, see
+`Configuration <http://django-connect-four.readthedocs.org/en/latest/settings.html>`_ doc page).
 
 If You don't want to use Mezzanine, You can use included views directly.
+
+`Read the Docs. <http://django-connect-four.readthedocs.org/>`_
 
 Installation
 ============
@@ -35,7 +36,7 @@ Installation
 Installation can be done by::
 
     # Get a fresh clone from repo
-    git clone git@github.com:PetrPapousek/django-connect-four.git
+    git clone https://github.com/PetrPapousek/django-connect-four.git
 
     # Activate your virtualenv and install package, for example by::
     virtualenv connect_four_virtualenv
